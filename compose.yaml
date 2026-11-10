@@ -5,6 +5,8 @@ services:
         user: "${UID:-1000}:${GID:-1000}"
         ports:
             - "8000:8000"
+        environment:
+            DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?serverVersion=8.4.0&charset=utf8mb4"
         volumes:
             - ./backend:/app
         depends_on:
@@ -25,18 +27,18 @@ services:
         depends_on:
             - backend
 
-    # Base de données MySQL
+    # Base de données MySQL (identifiants dans le fichier .env à la racine)
     db:
         image: mysql:8.4
         environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: evently
-            MYSQL_USER: evently
-            MYSQL_PASSWORD: evently
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_USER: ${MYSQL_USER}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
         volumes:
             - db_data:/var/lib/mysql
 
-    # phpMyAdmin -> http://localhost:8080 (utilisateur : evently / evently)
+    # phpMyAdmin -> http://localhost:8080 (identifiants MYSQL_USER / MYSQL_PASSWORD du .env)
     phpmyadmin:
         image: phpmyadmin:5
         environment:
