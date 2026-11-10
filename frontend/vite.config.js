@@ -8,7 +8,8 @@ export default defineConfig({
     proxy: {
       // En dev, les appels à /api sont redirigés vers le serveur Symfony (backend/)
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        // Dans Docker, API_URL vaut http://backend:8000
+        target: process.env.API_URL ?? 'http://127.0.0.1:8000',
         changeOrigin: true,
       },
     },
