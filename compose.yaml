@@ -2,13 +2,13 @@ services:
     # API Symfony -> http://localhost:8000
     backend:
         build: ./backend
-        user: "${UID:-1000}:${GID:-1000}" # En dev, permet d'avoir les bons droits sur les fichiers avec ./backend:/app
+        user: "${UID:-1000}:${GID:-1000}" # a retirer en prod
         ports:
             - "8000:8000"
         environment:
             DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}?serverVersion=8.4.0&charset=utf8mb4"
-        volumes:
-            - ./backend:/app # En dev, permet de monter le code source dans le conteneur pour le recharger à chaud -> A CHANGER EN PROD
+        volumes: # A changer en prod
+            - ./backend:/app
         depends_on:
             - db
 
