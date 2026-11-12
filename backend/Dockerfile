@@ -11,6 +11,8 @@ ENV COMPOSER_HOME=/tmp/composer
 
 WORKDIR /app
 
+COPY . .
+
 EXPOSE 8000
 
 CMD ["sh", "-c", "composer install && php -S 0.0.0.0:8000 -t public"]
