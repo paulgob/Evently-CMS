@@ -23,15 +23,17 @@ Evently-CMS/
 │   │   ├── bundles.php
 │   │   ├── routes.yaml       # Routes chargées depuis les attributs #[Route] des contrôleurs
 │   │   ├── services.yaml     # Autowiring de tout src/
-│   │   ├── packages/         # cache, doctrine, doctrine_migrations, framework, routing
-│   │   └── routes/
+│   │   ├── packages/         # cache, csrf, doctrine, doctrine_migrations, framework, routing, security, twig, validator…
+│   │   └── routes/           # security.yaml (route de déconnexion)
 │   ├── migrations/           # Migrations Doctrine (VersionAAAAMMJJHHMMSS.php)
 │   ├── public/index.php      # Point d'entrée HTTP
 │   ├── src/
 │   │   ├── Kernel.php
-│   │   ├── Controller/       # (vide pour le moment)
+│   │   ├── Controller/       # RegistrationController, SecurityController, UtilisateurController
 │   │   ├── Entity/           # Entités Doctrine
+│   │   ├── Form/             # RegistrationFormType
 │   │   └── Repository/       # Un repository par entité
+│   ├── templates/            # Twig du back-office (base, registration/, security/)
 │   └── var/                  # Cache et logs (non commité)
 └── frontend/                 # React 19 + Vite 8
     ├── index.html
@@ -70,6 +72,7 @@ Démarrage : `docker compose up` à la racine.
 
 - `symfony/framework-bundle`, `console`, `dotenv`, `runtime`, `yaml`, `flex` (7.4)
 - `doctrine/orm`, `doctrine/doctrine-bundle`, `doctrine/doctrine-migrations-bundle`
+- `symfony/security-bundle`, `form`, `validator`, `twig-bundle`
 - Dev : `symfony/maker-bundle`
 
 ### Entités
@@ -94,6 +97,8 @@ Mapping Doctrine par attributs PHP, stratégie de nommage `underscore` (proprié
 | `motDePasse`      | string(255)        |                                        |
 | `dateInscription` | DateTimeImmutable  | initialisée dans le constructeur       |
 
+`Utilisateur` implémente `UserInterface` et `PasswordAuthenticatedUserInterface` : identifiant = `email`, `getPassword()` renvoie `motDePasse` (haché), `getRoles()` renvoie `['ROLE_USER']` tant que `Role` n'est pas relié.
+
 Aucune relation entre entités pour le moment.
 
 ### Migrations
@@ -101,6 +106,17 @@ Aucune relation entre entités pour le moment.
 | Version                 | Contenu                                    |
 | ----------------------- | ------------------------------------------ |
 | `Version20261110133246` | Création des tables `role` et `utilisateur` |
+
+### Sécurité et pages du back-office (Twig)
+
+Firewall `main` : provider sur `Utilisateur::email`, authentification `form_login` avec CSRF, session par cookie.
+
+| Route          | Nom               | Rôle                                                          | Accès       |
+| -------------- | ----------------- | ------------------------------------------------------------- | ----------- |
+| `/register`    | `app_register`    | Formulaire d'inscription (email, pseudo, mot de passe, CGU)   | public      |
+| `/login`       | `app_login`       | Formulaire de connexion (affichage + traitement par le firewall) | public   |
+| `/logout`      | `app_logout`      | Déconnexion (interceptée par le firewall) → `/login`          | —           |
+| `/utilisateur` | `app_utilisateur` | Page d'accueil après connexion (JSON provisoire)              | `ROLE_USER` |
 
 ### Routes d'API
 
